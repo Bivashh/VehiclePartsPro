@@ -53,7 +53,7 @@ public class StaffController : ControllerBase
 
 [ApiController]
 [Route("api/customers")]
-[Authorize]
+//[Authorize]
 public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;

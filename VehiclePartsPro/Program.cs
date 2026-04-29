@@ -1,120 +1,118 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using VehiclePartsPro.Infrastructure.Data;
-using VehiclePartsPro.Middleware;
+using System.Security.Claims;
+using System.Text;
 using VehiclePartsPro.Application.Interfaces;
 using VehiclePartsPro.Application.Services;
 using VehiclePartsPro.Domain.Entities;
+using VehiclePartsPro.Infrastructure.Data;
+using VehiclePartsPro.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── 1. Database (EF Core + Npgsql) ──────────────────────────────────
+#region ───────────────────────── DATABASE ─────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+#endregion
 
-// ── 2. Identity (setup) + (AddIdentityCore for APIs)
-//
-//   
-//      "Use AddIdentityCore: If you are developing a Web API where you plan to use
-//       token-based authentication... AddIdentityCore provides a minimal, flexible,
-//       and cleaner setup for managing users."
-//
-//    AddIdentityCore gives us UserManager + RoleManager WITHOUT cookie auth,
-//    which is what we want since we're doing JWT.
+#region ───────────────────────── IDENTITY ─────────────────────────
 builder.Services.AddIdentityCore<User>(options =>
-{   
+{
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.User.RequireUniqueEmail = true;
 })
-.AddRoles<IdentityRole>()                      // enables RoleManager<IdentityRole>
-.AddEntityFrameworkStores<AppDbContext>()       // saves to our PostgreSQL via EF Core
-.AddDefaultTokenProviders();                   // for password reset tokens etc.
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+#endregion
 
-// ── 3. JWT Authentication ────────────────────────────
-//
-//    (Authentication Scheme table):
-//      "Bearer (JWT) → APIs, SPAs, mobile apps → Stateless, scalable, self-contained"
-//
+#region ───────────────────────── JWT AUTH ─────────────────────────
 var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Key is missing from appsettings.json");
+    ?? throw new InvalidOperationException("Jwt:Key missing");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
 
-// [Authorize], [Authorize(Roles="")], [AllowAnonymous]
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtKey)),
+
+        // IMPORTANT: ensures [Authorize(Roles="Admin")] works
+        RoleClaimType = ClaimTypes.Role
+    };
+});
+#endregion
+
+#region ───────────────────────── AUTHORIZATION ─────────────────────────
 builder.Services.AddAuthorization();
+#endregion
 
-// ── 4. Application services —  (Dependency Injection, AddScoped) ───────
+#region ───────────────────────── DI SERVICES ─────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+#endregion
 
-// ── 5. Controllers + OpenAPI ───────────────────────────────────────────────────
+#region ───────────────────────── CONTROLLERS + OPENAPI ─────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+#endregion
 
-// ── 6. CORS — allows the frontend to call this API ────────────────────────────
+#region ───────────────────────── CORS ─────────────────────────
 builder.Services.AddCors(options =>
-    options.AddDefaultPolicy(p =>
-        p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+});
+#endregion
 
 var app = builder.Build();
 
-// ── Middleware pipeline ────────────────────────────────────────────────────────
-// "GlobalExceptionHandler should be added before all middlewares"
-app.UseMiddleware<ExceptionMiddleware>();
+#region ───────────────────────── MIDDLEWARE PIPELINE ─────────────────────────
 
-app.MapOpenApi("/openapi.json");
+// global exception handler (must be first)
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors();
 app.UseHttpsRedirection();
-app.UseAuthentication();   // reads JWT from Authorization header — must come first
-app.UseAuthorization();    // enforces [Authorize] attributes
+
+
+app.UseAuthentication();   // reads JWT
+app.UseAuthorization();    // enforces roles
+
 app.MapControllers();
 
-// ── Seed Admin user on first run ───────────────────────────────────────────────
-// Seed roles are in AppDbContext.OnModelCreating (via migrations)
-// The admin USER is seeded here at runtime so the password gets properly hashed by Identity
-using (var scope = app.Services.CreateScope())
+// OpenAPI endpoint
+if (app.Environment.IsDevelopment())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-    const string adminEmail = "admin@vehicleparts.com";
-    if (await userManager.FindByEmailAsync(adminEmail) is null)
-    {
-        var admin = new User
-        {
-            FullName = "System Admin",
-            Email = adminEmail,
-            UserName = adminEmail
-        };
-        await userManager.CreateAsync(admin, "Admin@123");
-        await userManager.AddToRoleAsync(admin, "Admin");
-    }
+    app.MapOpenApi("/openapi/v1.json");
 }
+#endregion
 
+#region ───────────────────────── SEED ROLES + ADMIN ─────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
+    // ---- ROLES ----
     string[] roles = { "Admin", "Staff", "Customer" };
 
     foreach (var role in roles)
@@ -124,6 +122,25 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
+
+    // ---- ADMIN USER ----
+    const string adminEmail = "admin@vehicleparts.com";
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        var admin = new User
+        {
+            FullName = "System Admin",
+            Email = adminEmail,
+            UserName = adminEmail
+        };
+
+        await userManager.CreateAsync(admin, "Admin@123");
+        await userManager.AddToRoleAsync(admin, "Admin");
+    }
 }
+#endregion
 
 app.Run();
