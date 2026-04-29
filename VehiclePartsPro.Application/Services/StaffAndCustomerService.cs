@@ -22,7 +22,7 @@ public class StaffService : IStaffService
 
     public async Task<List<StaffDto>> GetAllStaffAsync()
     {
-        return await _db.Staff
+        return await _db.Staffs
             .Include(s => s.User)
             .Select(s => MapToDto(s))
             .ToListAsync();
@@ -30,7 +30,7 @@ public class StaffService : IStaffService
 
     public async Task<StaffDto?> GetStaffByIdAsync(int id)
     {
-        var staff = await _db.Staff
+        var staff = await _db.Staffs
             .Include(s => s.User)
             .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -39,7 +39,7 @@ public class StaffService : IStaffService
 
     public async Task<StaffDto> UpdateStaffAsync(int id, UpdateStaffDto dto)
     {
-        var staff = await _db.Staff
+        var staff = await _db.Staffs
             .Include(s => s.User)
             .FirstOrDefaultAsync(s => s.Id == id)
             ?? throw new KeyNotFoundException($"Staff with ID {id} not found.");
@@ -55,7 +55,7 @@ public class StaffService : IStaffService
 
     public async Task DeleteStaffAsync(int id)
     {
-        var staff = await _db.Staff
+        var staff = await _db.Staffs
             .Include(s => s.User)
             .FirstOrDefaultAsync(s => s.Id == id)
             ?? throw new KeyNotFoundException($"Staff with ID {id} not found.");

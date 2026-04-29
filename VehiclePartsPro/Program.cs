@@ -82,8 +82,7 @@ var app = builder.Build();
 // "GlobalExceptionHandler should be added before all middlewares"
 app.UseMiddleware<ExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
+app.MapOpenApi("/openapi.json");
 
 app.UseCors();
 app.UseHttpsRedirection();
@@ -109,6 +108,21 @@ using (var scope = app.Services.CreateScope())
         };
         await userManager.CreateAsync(admin, "Admin@123");
         await userManager.AddToRoleAsync(admin, "Admin");
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = { "Admin", "Staff", "Customer" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 

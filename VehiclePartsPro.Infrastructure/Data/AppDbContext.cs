@@ -46,26 +46,7 @@ public class AppDbContext : IdentityDbContext<User>
             .Property(c => c.TotalSpent)
             .HasColumnType("decimal(18,2)");
 
-        // ✅ SAFE SEEDING (your taught method)
-        builder.Entity<IdentityRole>().HasData(
-            new IdentityRole
-            {
-                Id = "1",
-                Name = "Admin",
-                NormalizedName = "ADMIN"
-            },
-            new IdentityRole
-            {
-                Id = "2",
-                Name = "Staff",
-                NormalizedName = "STAFF"
-            },
-            new IdentityRole
-            {
-                Id = "3",
-                Name = "Customer",
-                NormalizedName = "CUSTOMER"
-            }
-        );
+       
+        
     }
 }

@@ -110,7 +110,7 @@ public class AuthService : IAuthService
             EmployeeCode = dto.EmployeeCode
         };
 
-        _db.Staff.Add(staff);
+        _db.Staffs.Add(staff);
         await _db.SaveChangesAsync();
 
         _logger.LogInformation("New staff registered: {Email}", user.Email);
