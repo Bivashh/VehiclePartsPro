@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VehiclePartsPro.Domain.Entities;
+using VehiclePartsPro.Infrastructure.Identity;
 
 namespace VehiclePartsPro.Infrastructure.Data;
 
@@ -20,23 +20,14 @@ public class AppDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
-        // Staff → User (1:1)
-        builder.Entity<Staff>()
-            .HasOne(s => s.User)
-            .WithOne(u => u.Staff)
-            .HasForeignKey<Staff>(s => s.UserId);
-
-        // Customer → User (1:1)
-        builder.Entity<Customer>()
-            .HasOne(c => c.User)
-            .WithOne(u => u.Customer)
-            .HasForeignKey<Customer>(c => c.UserId);
+        // ❌ REMOVE User navigation mappings (they no longer exist)
 
         // Customer → Vehicles (1:M)
         builder.Entity<Vehicle>()
             .HasOne(v => v.Customer)
             .WithMany(c => c.Vehicles)
-            .HasForeignKey(v => v.CustomerId);
+            .HasForeignKey(v => v.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Money precision
         builder.Entity<Customer>()
@@ -58,5 +49,13 @@ public class AppDbContext : IdentityDbContext<User>
 
 
 
+        // Optional: enforce UserId uniqueness (1:1 logical constraint)
+        builder.Entity<Customer>()
+            .HasIndex(c => c.UserId)
+            .IsUnique();
+
+        builder.Entity<Staff>()
+            .HasIndex(s => s.UserId)
+            .IsUnique();
     }
 }
