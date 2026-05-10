@@ -6,19 +6,12 @@ public class RegisterCustomerDto
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
 }
 
-// What Admin sends to register a staff member
-public class RegisterStaffDto
-{
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string EmployeeCode { get; set; } = string.Empty;
-}
+
+
 
 // What the client sends to log in (same for all roles)
 public class LoginDto

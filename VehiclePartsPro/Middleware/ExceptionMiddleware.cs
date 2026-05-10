@@ -3,20 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace VehiclePartsPro.Middleware;
 
-/// <summary>
-/// Global Exception Handler — convention-based middleware.
-///
-///  "A global exception handler is a middleware that
-/// catches all unhandled exceptions in an application."
-///
-/// Convention-based = no interface needed. ASP.NET discovers it by convention:
-///   - Must have a constructor accepting RequestDelegate
-///   - Must have InvokeAsync(HttpContext) method
-///
-/// "GlobalExceptionHandler should be added BEFORE all
-/// middlewares so that it can catch all exceptions."
-/// That's why it's the first line in Program.cs after app = builder.Build().
-/// </summary>
+
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;

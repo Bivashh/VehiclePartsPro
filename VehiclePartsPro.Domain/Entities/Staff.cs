@@ -22,7 +22,4 @@ public class Staff
 
     [Required]
     public DateTime HiredAt { get; set; } = DateTime.UtcNow;
-
-    // Navigation
-    public User User { get; set; } = null!;
 }

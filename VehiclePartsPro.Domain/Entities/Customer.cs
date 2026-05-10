@@ -7,7 +7,7 @@ public class Customer
     [Key]
     public int Id { get; set; }
 
-    // FK to Identity user
+    // FK to Identity user (stored as string)
     [Required]
     public string UserId { get; set; } = string.Empty;
 
@@ -24,7 +24,6 @@ public class Customer
 
     public DateTime? CreditDueDate { get; set; }
 
-    // Navigation
-    public User User { get; set; } = null!;
+    // Navigation (ONLY domain entities)
     public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }
