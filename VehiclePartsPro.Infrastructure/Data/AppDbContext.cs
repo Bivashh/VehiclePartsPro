@@ -14,6 +14,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Staff> Staffs { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
+    public DbSet<Part> Parts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -36,6 +37,17 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<Customer>()
             .Property(c => c.TotalSpent)
             .HasColumnType("decimal(18,2)");
+
+        // Part configuration
+        builder.Entity<Part>()
+            .HasIndex(p => p.PartNumber)
+            .IsUnique();
+
+        builder.Entity<Part>()
+            .Property(p => p.UnitPrice)
+            .HasColumnType("decimal(18,2)");
+
+
 
         // Optional: enforce UserId uniqueness (1:1 logical constraint)
         builder.Entity<Customer>()
