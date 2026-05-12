@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using VehiclePartsPro.Application.DTOs.Customer;
 using VehiclePartsPro.Application.DTOs.Staff;
 using VehiclePartsPro.Application.Interfaces;
 
@@ -11,10 +12,14 @@ namespace VehiclePartsPro.Controllers;
 public class StaffController : ControllerBase
 {
     private readonly IStaffService _staffService;
+    private readonly ICustomerService _customerService;
 
-    public StaffController(IStaffService staffService)
+    public StaffController(
+        IStaffService staffService,
+        ICustomerService customerService)
     {
         _staffService = staffService;
+        _customerService = customerService;
     }
 
     // =========================================
@@ -66,7 +71,6 @@ public class StaffController : ControllerBase
         if (staff == null)
             return NotFound("Staff profile not found");
 
-        // Only update editable fields
         staff.Phone = dto.Phone;
 
         await _staffService.UpdateStaffAsync(staff);
@@ -89,5 +93,17 @@ public class StaffController : ControllerBase
         await _staffService.DeleteStaffAsync(staff);
 
         return Ok("Staff deleted successfully");
+    }
+
+    // =========================================
+    // STAFF/ADMIN → REGISTER CUSTOMER WITH VEHICLE
+    // =========================================
+    [HttpPost("customers/register-with-vehicle")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> RegisterCustomerWithVehicle(RegisterCustomerWithVehicleDto dto)
+    {
+        var result = await _customerService.RegisterCustomerWithVehicleAsync(dto);
+
+        return Ok(result);
     }
 }

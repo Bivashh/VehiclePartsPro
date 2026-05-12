@@ -20,4 +20,7 @@ public interface ICustomerService
     Task UpdateVehicleAsync(Vehicle vehicle);
 
     Task DeleteVehicleAsync(Vehicle vehicle);
+
+    Task<CustomerDto> RegisterCustomerWithVehicleAsync(RegisterCustomerWithVehicleDto dto);
+
 }

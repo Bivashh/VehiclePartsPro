@@ -39,3 +39,19 @@ public class CustomerSearchDto
     public string? VehiclePlate { get; set; }
     public int? CustomerId { get; set; }
 }
+
+public class RegisterCustomerWithVehicleDto
+{
+    public string FullName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+
+    public string Phone { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+
+    public string PlateNumber { get; set; } = string.Empty;
+    public string Make { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string? Notes { get; set; }
+}
