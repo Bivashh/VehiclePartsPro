@@ -5,7 +5,7 @@ using VehiclePartsPro.Application.Interfaces;
 using VehiclePartsPro.Domain.Entities;
 using VehiclePartsPro.Infrastructure.Data;
 
-namespace VehiclePartsPro.Application.Services;
+namespace VehiclePartsPro.Infrastructure.Services;
 
 public class PartService : IPartService
 {
@@ -34,7 +34,7 @@ public class PartService : IPartService
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
 
-        return part is null ? null : MapToDto(part);
+        return part == null ? null : MapToDto(part);
     }
 
     public async Task<PartDto> CreatePartAsync(CreatePartDto dto)
@@ -42,17 +42,21 @@ public class PartService : IPartService
         var partNumber = dto.PartNumber.Trim();
 
         var duplicateExists = await _db.Parts
-            .AnyAsync(p => p.PartNumber.ToLower() == partNumber.ToLower() && p.IsActive);
+            .AnyAsync(p =>
+                p.PartNumber.ToLower() == partNumber.ToLower() &&
+                p.IsActive);
 
         if (duplicateExists)
+        {
             throw new InvalidOperationException($"Part number '{partNumber}' already exists.");
+        }
 
         var part = new Part
         {
             Name = dto.Name.Trim(),
             PartNumber = partNumber,
             Category = dto.Category.Trim(),
-            Description = dto.Description,
+            Description = dto.Description?.Trim(),
             UnitPrice = dto.UnitPrice,
             StockQuantity = dto.StockQuantity,
             LowStockThreshold = dto.LowStockThreshold,
@@ -71,8 +75,12 @@ public class PartService : IPartService
     public async Task<PartDto> UpdatePartAsync(int id, UpdatePartDto dto)
     {
         var part = await _db.Parts
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive)
-            ?? throw new KeyNotFoundException($"Part with ID {id} not found.");
+            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+
+        if (part == null)
+        {
+            throw new KeyNotFoundException($"Part with ID {id} not found.");
+        }
 
         var partNumber = dto.PartNumber.Trim();
 
@@ -83,12 +91,14 @@ public class PartService : IPartService
                 p.IsActive);
 
         if (duplicateExists)
+        {
             throw new InvalidOperationException($"Part number '{partNumber}' already exists.");
+        }
 
         part.Name = dto.Name.Trim();
         part.PartNumber = partNumber;
         part.Category = dto.Category.Trim();
-        part.Description = dto.Description;
+        part.Description = dto.Description?.Trim();
         part.UnitPrice = dto.UnitPrice;
         part.StockQuantity = dto.StockQuantity;
         part.LowStockThreshold = dto.LowStockThreshold;
@@ -104,8 +114,12 @@ public class PartService : IPartService
     public async Task DeletePartAsync(int id)
     {
         var part = await _db.Parts
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive)
-            ?? throw new KeyNotFoundException($"Part with ID {id} not found.");
+            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+
+        if (part == null)
+        {
+            throw new KeyNotFoundException($"Part with ID {id} not found.");
+        }
 
         part.IsActive = false;
         part.UpdatedAt = DateTime.UtcNow;
