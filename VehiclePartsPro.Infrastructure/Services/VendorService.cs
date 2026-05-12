@@ -39,15 +39,14 @@ public class VendorService : IVendorService
 
     public async Task<VendorDto> CreateVendorAsync(CreateVendorDto dto)
     {
-        if (!string.IsNullOrWhiteSpace(dto.Email))
-        {
-            var email = dto.Email.Trim().ToLower();
+        var email = NormalizeEmail(dto.Email);
 
+        if (!string.IsNullOrWhiteSpace(email))
+        {
             var duplicateEmailExists = await _db.Vendors
                 .AnyAsync(v =>
                     v.Email != null &&
-                    v.Email.ToLower() == email &&
-                    v.IsActive);
+                    v.Email.ToLower() == email);
 
             if (duplicateEmailExists)
             {
@@ -60,7 +59,7 @@ public class VendorService : IVendorService
             Name = dto.Name.Trim(),
             ContactPerson = dto.ContactPerson?.Trim(),
             PhoneNumber = dto.PhoneNumber?.Trim(),
-            Email = dto.Email?.Trim(),
+            Email = email,
             Address = dto.Address?.Trim(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -84,16 +83,15 @@ public class VendorService : IVendorService
             throw new KeyNotFoundException($"Vendor with ID {id} not found.");
         }
 
-        if (!string.IsNullOrWhiteSpace(dto.Email))
-        {
-            var email = dto.Email.Trim().ToLower();
+        var email = NormalizeEmail(dto.Email);
 
+        if (!string.IsNullOrWhiteSpace(email))
+        {
             var duplicateEmailExists = await _db.Vendors
                 .AnyAsync(v =>
                     v.Id != id &&
                     v.Email != null &&
-                    v.Email.ToLower() == email &&
-                    v.IsActive);
+                    v.Email.ToLower() == email);
 
             if (duplicateEmailExists)
             {
@@ -104,7 +102,7 @@ public class VendorService : IVendorService
         vendor.Name = dto.Name.Trim();
         vendor.ContactPerson = dto.ContactPerson?.Trim();
         vendor.PhoneNumber = dto.PhoneNumber?.Trim();
-        vendor.Email = dto.Email?.Trim();
+        vendor.Email = email;
         vendor.Address = dto.Address?.Trim();
         vendor.UpdatedAt = DateTime.UtcNow;
 
@@ -128,9 +126,25 @@ public class VendorService : IVendorService
         vendor.IsActive = false;
         vendor.UpdatedAt = DateTime.UtcNow;
 
+        // Important:
+        // Because Email has a unique index in the database,
+        // clearing the email allows the same email to be reused
+        // if a vendor is deleted and created again later.
+        vendor.Email = null;
+
         await _db.SaveChangesAsync();
 
         _logger.LogWarning("Vendor deleted: {VendorId}", id);
+    }
+
+    private static string? NormalizeEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        return email.Trim().ToLower();
     }
 
     private static VendorDto MapToDto(Vendor vendor)
