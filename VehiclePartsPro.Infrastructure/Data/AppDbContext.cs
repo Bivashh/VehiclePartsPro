@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<SalesInvoice> SalesInvoices { get; set; }
     public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+    public DbSet<LowStockAlert> LowStockAlerts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -110,6 +111,13 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(sii => sii.Part)
             .WithMany()
             .HasForeignKey(sii => sii.PartId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Low Stock Alert configuration
+        builder.Entity<LowStockAlert>()
+            .HasOne(alert => alert.Part)
+            .WithMany()
+            .HasForeignKey(alert => alert.PartId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Optional: enforce UserId uniqueness (1:1 logical constraint)
