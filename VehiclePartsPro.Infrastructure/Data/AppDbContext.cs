@@ -19,6 +19,9 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
     public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
 
+    public DbSet<SalesInvoice> SalesInvoices { get; set; }
+    public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -89,6 +92,24 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(item => item.Part)
             .WithMany()
             .HasForeignKey(item => item.PartId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<SalesInvoice>()
+            .HasOne(si => si.Customer)
+            .WithMany()
+            .HasForeignKey(si => si.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<SalesInvoiceItem>()
+            .HasOne(sii => sii.SalesInvoice)
+            .WithMany(si => si.Items)
+            .HasForeignKey(sii => sii.SalesInvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<SalesInvoiceItem>()
+            .HasOne(sii => sii.Part)
+            .WithMany()
+            .HasForeignKey(sii => sii.PartId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Optional: enforce UserId uniqueness (1:1 logical constraint)

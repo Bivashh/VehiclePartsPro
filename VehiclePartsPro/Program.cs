@@ -7,6 +7,7 @@ using System.Text;
 
 using VehiclePartsPro.Application.Interfaces;
 using VehiclePartsPro.Application.Services;
+using VehiclePartsPro.Application.DTOs.Email;
 
 using VehiclePartsPro.Infrastructure.Data;
 using VehiclePartsPro.Infrastructure.Identity;   // ✅ CORRECT USER
@@ -77,6 +78,11 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPartService, PartService>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 builder.Services.AddScoped<IPurchaseInvoiceService, PurchaseInvoiceService>();
+builder.Services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 #endregion
 
 #region CONTROLLERS
