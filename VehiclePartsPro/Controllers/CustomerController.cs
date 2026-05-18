@@ -9,7 +9,6 @@ namespace VehiclePartsPro.Controllers;
 
 [ApiController]
 [Route("api/customers")]
-[Authorize(Roles = "Customer")]
 public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;
@@ -23,6 +22,7 @@ public class CustomerController : ControllerBase
     // GET MY PROFILE
     // =========================
     [HttpGet("me")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetMyProfile()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -39,6 +39,7 @@ public class CustomerController : ControllerBase
     // UPDATE PROFILE
     // =========================
     [HttpPut("me")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> UpdateProfile(UpdateCustomerProfileDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -66,6 +67,7 @@ public class CustomerController : ControllerBase
     // GET VEHICLES
     // =========================
     [HttpGet("vehicles")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetVehicles()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -82,6 +84,7 @@ public class CustomerController : ControllerBase
     // ADD VEHICLE
     // =========================
     [HttpPost("vehicles")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> AddVehicle(VehicleDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -116,6 +119,7 @@ public class CustomerController : ControllerBase
     // UPDATE VEHICLE
     // =========================
     [HttpPut("vehicles/{id}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> UpdateVehicle(int id, VehicleDto dto)
     {
         var vehicle = await _customerService.GetVehicleByIdAsync(id);
@@ -141,6 +145,7 @@ public class CustomerController : ControllerBase
     // DELETE VEHICLE
     // =========================
     [HttpDelete("vehicles/{id}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> DeleteVehicle(int id)
     {
         var vehicle = await _customerService.GetVehicleByIdAsync(id);
@@ -156,5 +161,39 @@ public class CustomerController : ControllerBase
         });
     }
 
-    
+    // =========================
+    // ADMIN → CUSTOMER REPORTS
+    // =========================
+    [HttpGet("reports")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetCustomerReports()
+    {
+        var reports = await _customerService.GetCustomerReportsAsync();
+
+        return Ok(reports);
+    }
+
+    // =========================
+    // ADMIN → CUSTOMER HISTORY
+    // =========================
+    [HttpGet("{customerId}/history")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetCustomerHistory(int customerId)
+    {
+        var history = await _customerService.GetCustomerHistoryAsync(customerId);
+
+        return Ok(history);
+    }
+
+    // =========================
+    // ADMIN → SEARCH CUSTOMERS
+    // =========================
+    [HttpPost("search")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> SearchCustomers(CustomerSearchDto dto)
+    {
+        var result = await _customerService.SearchCustomersAsync(dto);
+
+        return Ok(result);
+    }
 }

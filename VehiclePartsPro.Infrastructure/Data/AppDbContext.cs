@@ -21,7 +21,9 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<SalesInvoice> SalesInvoices { get; set; }
     public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
-
+    public DbSet<LowStockAlert> LowStockAlerts { get; set; }
+    public DbSet<Appointment> Appointments { get; set; }
+    public DbSet<Review> Reviews { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -112,6 +114,13 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(sii => sii.PartId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Low Stock Alert configuration
+        builder.Entity<LowStockAlert>()
+            .HasOne(alert => alert.Part)
+            .WithMany()
+            .HasForeignKey(alert => alert.PartId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Optional: enforce UserId uniqueness (1:1 logical constraint)
         builder.Entity<Customer>()
             .HasIndex(c => c.UserId)
@@ -119,6 +128,41 @@ public class AppDbContext : IdentityDbContext<User>
 
         builder.Entity<Staff>()
             .HasIndex(s => s.UserId)
+            .IsUnique();
+
+        builder.Entity<Appointment>()
+            .HasOne(a => a.Customer)
+            .WithMany()
+            .HasForeignKey(a => a.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Appointment>()
+            .HasOne(a => a.Vehicle)
+            .WithMany()
+            .HasForeignKey(a => a.VehicleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Appointment>()
+            .HasOne(a => a.Staff)
+            .WithMany()
+            .HasForeignKey(a => a.StaffId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Review>()
+            .HasOne(r => r.Customer)
+            .WithMany()
+            .HasForeignKey(r => r.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Review>()
+            .HasOne(r => r.Appointment)
+            .WithMany()
+            .HasForeignKey(r => r.AppointmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ONE REVIEW PER APPOINTMENT
+        builder.Entity<Review>()
+            .HasIndex(r => r.AppointmentId)
             .IsUnique();
     }
 }

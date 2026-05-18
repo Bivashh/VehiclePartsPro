@@ -23,4 +23,10 @@ public interface ICustomerService
 
     Task<CustomerDto> RegisterCustomerWithVehicleAsync(RegisterCustomerWithVehicleDto dto);
 
+    Task<List<CustomerReportDto>> GetCustomerReportsAsync();
+
+    Task<List<CustomerHistoryDto>> GetCustomerHistoryAsync(int customerId);
+
+    Task<List<CustomerReportDto>> SearchCustomersAsync(CustomerSearchDto dto);
+
 }
