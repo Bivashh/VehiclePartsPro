@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VehiclePartsPro.Infrastructure.Data;
@@ -11,9 +12,11 @@ using VehiclePartsPro.Infrastructure.Data;
 namespace VehiclePartsPro.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260518080139_AddAppointments")]
+    partial class AddAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,40 +406,6 @@ namespace VehiclePartsPro.Infrastructure.Migrations
                     b.ToTable("PurchaseInvoiceItems");
                 });
 
-            modelBuilder.Entity("VehiclePartsPro.Domain.Entities.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AppointmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId")
-                        .IsUnique();
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("VehiclePartsPro.Domain.Entities.SalesInvoice", b =>
                 {
                     b.Property<int>("Id")
@@ -810,25 +779,6 @@ namespace VehiclePartsPro.Infrastructure.Migrations
                     b.Navigation("Part");
 
                     b.Navigation("PurchaseInvoice");
-                });
-
-            modelBuilder.Entity("VehiclePartsPro.Domain.Entities.Review", b =>
-                {
-                    b.HasOne("VehiclePartsPro.Domain.Entities.Appointment", "Appointment")
-                        .WithMany()
-                        .HasForeignKey("AppointmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VehiclePartsPro.Domain.Entities.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Appointment");
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("VehiclePartsPro.Domain.Entities.SalesInvoice", b =>

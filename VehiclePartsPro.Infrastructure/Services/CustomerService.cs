@@ -5,6 +5,9 @@ using VehiclePartsPro.Application.Interfaces;
 using VehiclePartsPro.Domain.Entities;
 using VehiclePartsPro.Infrastructure.Data;
 using VehiclePartsPro.Infrastructure.Identity;
+using Microsoft.EntityFrameworkCore;
+using VehiclePartsPro.Application.DTOs.Customer;
+using VehiclePartsPro.Infrastructure.Identity;
 
 namespace VehiclePartsPro.Infrastructure.Services;
 
@@ -170,5 +173,111 @@ public class CustomerService : ICustomerService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+    public async Task<List<CustomerReportDto>> GetCustomerReportsAsync()
+    {
+        return await _db.Customers
+            .Include(c => c.Vehicles)
+            .Select(c => new CustomerReportDto
+            {
+                CustomerId = c.Id,
+                FullName = _db.Users
+                    .Where(u => u.Id == c.UserId)
+                    .Select(u => u.FullName)
+                    .FirstOrDefault() ?? "",
+
+                Email = _db.Users
+                    .Where(u => u.Id == c.UserId)
+                    .Select(u => u.Email!)
+                    .FirstOrDefault() ?? "",
+
+                Phone = c.Phone,
+                Address = c.Address,
+                CreditBalance = c.CreditBalance,
+                TotalSpent = c.TotalSpent,
+                TotalVehicles = c.Vehicles.Count,
+
+                TotalOrders = _db.SalesInvoices
+                    .Count(si => si.CustomerId == c.Id)
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<CustomerHistoryDto>> GetCustomerHistoryAsync(int customerId)
+    {
+        return await _db.SalesInvoices
+            .Where(si => si.CustomerId == customerId)
+            .OrderByDescending(si => si.InvoiceDate)
+            .Select(si => new CustomerHistoryDto
+            {
+                InvoiceId = si.Id,
+                InvoiceDate = si.InvoiceDate,
+                TotalAmount = si.TotalAmount,
+                PaymentStatus = si.PaymentStatus
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<CustomerReportDto>> SearchCustomersAsync(CustomerSearchDto dto)
+    {
+        var query = _db.Customers
+            .Include(c => c.Vehicles)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(dto.Phone))
+        {
+            query = query.Where(c => c.Phone.Contains(dto.Phone));
+        }
+
+        if (dto.CustomerId.HasValue)
+        {
+            query = query.Where(c => c.Id == dto.CustomerId.Value);
+        }
+
+        var customers = await query.ToListAsync();
+
+        var users = await _db.Users.ToListAsync();
+
+        return customers
+            .Where(c =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == c.UserId);
+
+                var matchesName =
+                    string.IsNullOrWhiteSpace(dto.Name) ||
+                    (user?.FullName?.Contains(dto.Name,
+                        StringComparison.OrdinalIgnoreCase) ?? false);
+
+                var matchesEmail =
+                    string.IsNullOrWhiteSpace(dto.Email) ||
+                    (user?.Email?.Contains(dto.Email,
+                        StringComparison.OrdinalIgnoreCase) ?? false);
+
+                var matchesVehicle =
+                    string.IsNullOrWhiteSpace(dto.VehiclePlate) ||
+                    c.Vehicles.Any(v =>
+                        v.PlateNumber.Contains(dto.VehiclePlate,
+                            StringComparison.OrdinalIgnoreCase));
+
+                return matchesName && matchesEmail && matchesVehicle;
+            })
+            .Select(c =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == c.UserId);
+
+                return new CustomerReportDto
+                {
+                    CustomerId = c.Id,
+                    FullName = user?.FullName ?? "",
+                    Email = user?.Email ?? "",
+                    Phone = c.Phone,
+                    Address = c.Address,
+                    CreditBalance = c.CreditBalance,
+                    TotalSpent = c.TotalSpent,
+                    TotalVehicles = c.Vehicles.Count,
+                    TotalOrders = _db.SalesInvoices.Count(si => si.CustomerId == c.Id)
+                };
+            })
+            .ToList();
     }
 }
