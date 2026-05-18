@@ -13,13 +13,16 @@ public class StaffController : ControllerBase
 {
     private readonly IStaffService _staffService;
     private readonly ICustomerService _customerService;
+    private readonly IOverduePaymentReminderService _overduePaymentReminderService;
 
     public StaffController(
         IStaffService staffService,
-        ICustomerService customerService)
+        ICustomerService customerService,
+        IOverduePaymentReminderService overduePaymentReminderService)
     {
         _staffService = staffService;
         _customerService = customerService;
+        _overduePaymentReminderService = overduePaymentReminderService;
     }
 
     // =========================================
@@ -30,7 +33,6 @@ public class StaffController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var staffs = await _staffService.GetAllStaffAsync();
-
         return Ok(staffs);
     }
 
@@ -105,5 +107,22 @@ public class StaffController : ControllerBase
         var result = await _customerService.RegisterCustomerWithVehicleAsync(dto);
 
         return Ok(result);
+    }
+
+    // =========================================
+    // STAFF/ADMIN → SEND OVERDUE PAYMENT REMINDERS
+    // =========================================
+    [HttpPost("customers/send-overdue-reminders")]
+    [Authorize(Roles = "Admin,Staff")]
+    public async Task<IActionResult> SendOverduePaymentReminders()
+    {
+        var result = await _overduePaymentReminderService.SendOverduePaymentRemindersAsync();
+
+        return Ok(new
+        {
+            message = "Overdue payment reminder process completed.",
+            totalCustomersReminded = result.Count,
+            customers = result
+        });
     }
 }
