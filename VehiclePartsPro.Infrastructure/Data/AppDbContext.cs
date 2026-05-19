@@ -24,6 +24,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<LowStockAlert> LowStockAlerts { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<PartRequest> PartRequests { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -164,5 +165,11 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<Review>()
             .HasIndex(r => r.AppointmentId)
             .IsUnique();
+
+        builder.Entity<PartRequest>()
+            .HasOne(pr => pr.Customer)
+            .WithMany()
+            .HasForeignKey(pr => pr.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -42,6 +42,15 @@ public class AuthService : IAuthService
             Address = dto.Address ?? ""
         };
 
+        customer.Vehicles.Add(new Vehicle
+        {
+            PlateNumber = dto.PlateNumber,
+            Make = dto.Make,
+            Model = dto.Model,
+            Year = dto.Year,
+            Notes = dto.VehicleNotes
+        });
+
         await _customerService.CreateCustomerAsync(customer);
 
         var role = await _identityService.GetUserRoleAsync(user.UserId);

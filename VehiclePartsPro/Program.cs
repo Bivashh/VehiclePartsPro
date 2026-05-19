@@ -88,6 +88,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IOverduePaymentReminderService, OverduePaymentReminderService>();
+builder.Services.AddScoped<IPartRequestService, PartRequestService>();
 #endregion
 
 #region CONTROLLERS

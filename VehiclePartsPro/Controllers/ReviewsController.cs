@@ -51,7 +51,7 @@ public class ReviewsController : ControllerBase
 
     // ADMIN → ALL REVIEWS
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> GetAll()
     {
         var result = await _reviewService

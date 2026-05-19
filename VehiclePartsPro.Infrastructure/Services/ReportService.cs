@@ -52,19 +52,23 @@ public class ReportService : IReportService
     // =========================================
     public async Task<List<MonthlySalesDto>> GetMonthlySalesReportAsync()
     {
-        return await _db.SalesInvoices
+        var salesInvoices = await _db.SalesInvoices
+            .AsNoTracking()
+            .ToListAsync();
+
+        return salesInvoices
             .GroupBy(s => new
             {
-                s.InvoiceDate.Year,
-                s.InvoiceDate.Month
+                Year = s.InvoiceDate.Year,
+                Month = s.InvoiceDate.Month
             })
             .Select(g => new MonthlySalesDto
             {
                 Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                SalesRevenue = g.Sum(x => x.TotalAmount)
+                SalesRevenue = g.Sum(s => s.TotalAmount)
             })
             .OrderBy(x => x.Month)
-            .ToListAsync();
+            .ToList();
     }
 
     // =========================================

@@ -165,7 +165,7 @@ public class CustomerController : ControllerBase
     // ADMIN → CUSTOMER REPORTS
     // =========================
     [HttpGet("reports")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> GetCustomerReports()
     {
         var reports = await _customerService.GetCustomerReportsAsync();
@@ -177,7 +177,7 @@ public class CustomerController : ControllerBase
     // ADMIN → CUSTOMER HISTORY
     // =========================
     [HttpGet("{customerId}/history")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff ")]
     public async Task<IActionResult> GetCustomerHistory(int customerId)
     {
         var history = await _customerService.GetCustomerHistoryAsync(customerId);
@@ -189,7 +189,7 @@ public class CustomerController : ControllerBase
     // ADMIN → SEARCH CUSTOMERS
     // =========================
     [HttpPost("search")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> SearchCustomers(CustomerSearchDto dto)
     {
         var result = await _customerService.SearchCustomersAsync(dto);

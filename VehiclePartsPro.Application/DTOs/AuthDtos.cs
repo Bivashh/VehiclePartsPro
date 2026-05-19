@@ -8,6 +8,13 @@ public class RegisterCustomerDto
     public string Password { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Address { get; set; }
+
+    // Vehicle details
+    public string PlateNumber { get; set; } = string.Empty;
+    public string Make { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string? VehicleNotes { get; set; }
 }
 
 
