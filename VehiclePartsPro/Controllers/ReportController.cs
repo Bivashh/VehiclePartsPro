@@ -16,9 +16,9 @@ public class ReportsController : ControllerBase
         _reportService = reportService;
     }
 
-    // =========================================
+    
     // FINANCIAL SUMMARY
-    // =========================================
+    
     [HttpGet("financial-summary")]
     public async Task<IActionResult> GetFinancialSummary()
     {
@@ -27,9 +27,9 @@ public class ReportsController : ControllerBase
         return Ok(result);
     }
 
-    // =========================================
+
     // MONTHLY SALES REPORT
-    // =========================================
+   
     [HttpGet("monthly-sales")]
     public async Task<IActionResult> GetMonthlySales()
     {
@@ -38,9 +38,9 @@ public class ReportsController : ControllerBase
         return Ok(result);
     }
 
-    // =========================================
+    
     // TOP SELLING PARTS
-    // =========================================
+   
     [HttpGet("top-selling-parts")]
     public async Task<IActionResult> GetTopSellingParts()
     {

@@ -21,9 +21,9 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
-    // =========================
+    
     // REGISTER CUSTOMER
-    // =========================
+    
     [HttpPost("register-customer")]
     public async Task<IActionResult> RegisterCustomer(
         [FromBody] RegisterCustomerDto dto)
@@ -33,9 +33,9 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    // =========================
+    
     // REGISTER STAFF
-    // =========================
+    
     [HttpPost("register-staff")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RegisterStaff(
@@ -46,9 +46,9 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    // =========================
+    
     // LOGIN
-    // =========================
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login(
         [FromBody] LoginDto dto)

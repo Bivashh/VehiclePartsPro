@@ -17,7 +17,7 @@ public class AppointmentsController : ControllerBase
         _appointmentService = appointmentService;
     }
 
-    // CUSTOMER → CREATE
+    // CUSTOMER  CREATE
     [HttpPost]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Create(CreateAppointmentDto dto)
@@ -33,7 +33,7 @@ public class AppointmentsController : ControllerBase
         return Ok(result);
     }
 
-    // CUSTOMER → MY APPOINTMENTS
+    // CUSTOMER  MY APPOINTMENTS
     [HttpGet("me")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetMine()
@@ -49,7 +49,7 @@ public class AppointmentsController : ControllerBase
         return Ok(result);
     }
 
-    // ADMIN/STAFF → ALL
+    // ADMIN/STAFF ALL
     [HttpGet]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> GetAll()
@@ -60,7 +60,7 @@ public class AppointmentsController : ControllerBase
         return Ok(result);
     }
 
-    // ADMIN/STAFF → UPDATE STATUS
+    // ADMIN/STAFF  UPDATE STATUS
     [HttpPut("{id}/status")]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> UpdateStatus(
@@ -82,7 +82,7 @@ public class AppointmentsController : ControllerBase
         });
     }
 
-    // CUSTOMER → CANCEL OWN
+    // CUSTOMER  CANCEL OWN
     [HttpPut("{id}/cancel")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Cancel(int id)

@@ -25,9 +25,9 @@ public class StaffController : ControllerBase
         _overduePaymentReminderService = overduePaymentReminderService;
     }
 
-    // =========================================
+    
     // ADMIN → GET ALL STAFF
-    // =========================================
+   
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
@@ -36,9 +36,8 @@ public class StaffController : ControllerBase
         return Ok(staffs);
     }
 
-    // =========================================
+    
     // STAFF → GET OWN PROFILE
-    // =========================================
     [HttpGet("me")]
     [Authorize(Roles = "Staff")]
     public async Task<IActionResult> GetMyProfile()
@@ -56,9 +55,9 @@ public class StaffController : ControllerBase
         return Ok(staff);
     }
 
-    // =========================================
+    
     // STAFF → UPDATE OWN PROFILE
-    // =========================================
+    
     [HttpPut("me")]
     [Authorize(Roles = "Staff")]
     public async Task<IActionResult> UpdateProfile(UpdateStaffDto dto)
@@ -80,9 +79,9 @@ public class StaffController : ControllerBase
         return Ok("Staff profile updated successfully");
     }
 
-    // =========================================
+    
     // ADMIN → DELETE STAFF
-    // =========================================
+    
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
@@ -97,9 +96,9 @@ public class StaffController : ControllerBase
         return Ok("Staff deleted successfully");
     }
 
-    // =========================================
+    
     // STAFF/ADMIN → REGISTER CUSTOMER WITH VEHICLE
-    // =========================================
+    
     [HttpPost("customers/register-with-vehicle")]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> RegisterCustomerWithVehicle(RegisterCustomerWithVehicleDto dto)
@@ -109,9 +108,9 @@ public class StaffController : ControllerBase
         return Ok(result);
     }
 
-    // =========================================
+    
     // STAFF/ADMIN → SEND OVERDUE PAYMENT REMINDERS
-    // =========================================
+    
     [HttpPost("customers/send-overdue-reminders")]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> SendOverduePaymentReminders()

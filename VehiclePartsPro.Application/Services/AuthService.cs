@@ -113,7 +113,7 @@ public class AuthService : IAuthService
     // =========================
     public async Task<TokenResponseDto> LoginAsync(LoginDto dto)
     {
-        var user = await _identityService.ValidateUserAsync(
+            var user = await _identityService.ValidateUserAsync(
             dto.Email,
             dto.Password)
             ?? throw new UnauthorizedAccessException("Invalid credentials");

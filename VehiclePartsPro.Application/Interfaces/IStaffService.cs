@@ -1,4 +1,5 @@
-﻿using VehiclePartsPro.Domain.Entities;
+﻿using VehiclePartsPro.Application.DTOs.Staff;
+using VehiclePartsPro.Domain.Entities;
 
 namespace VehiclePartsPro.Application.Interfaces;
 
@@ -6,7 +7,7 @@ public interface IStaffService
 {
     Task CreateStaffAsync(Staff staff);
 
-    Task<List<Staff>> GetAllStaffAsync();
+    Task<List<StaffDto>> GetAllStaffAsync();
 
     Task<Staff?> GetStaffByIdAsync(int id);
 

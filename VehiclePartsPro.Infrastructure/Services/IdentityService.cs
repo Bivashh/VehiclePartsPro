@@ -13,7 +13,7 @@ public class IdentityService : IIdentityService
         _userManager = userManager;
     }
 
-    // ✅ CREATE USER
+    //  CREATE USER
     public async Task<(string UserId, string FullName, string Email)> CreateUserAsync(
         string email, string password, string fullName, string role)
     {
@@ -34,7 +34,7 @@ public class IdentityService : IIdentityService
         return (user.Id, user.FullName, user.Email!);
     }
 
-    // ✅ LOGIN VALIDATION
+    //  LOGIN VALIDATION
     public async Task<(string UserId, string FullName, string Email)?> ValidateUserAsync(
         string email, string password)
     {
@@ -51,7 +51,7 @@ public class IdentityService : IIdentityService
         return (user.Id, user.FullName, user.Email!);
     }
 
-    // ✅ GET ROLE
+    //  GET ROLE
     public async Task<string> GetUserRoleAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

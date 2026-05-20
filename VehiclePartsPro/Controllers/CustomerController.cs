@@ -161,9 +161,9 @@ public class CustomerController : ControllerBase
         });
     }
 
-    // =========================
+
     // ADMIN → CUSTOMER REPORTS
-    // =========================
+    
     [HttpGet("reports")]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> GetCustomerReports()
@@ -173,9 +173,9 @@ public class CustomerController : ControllerBase
         return Ok(reports);
     }
 
-    // =========================
+    
     // ADMIN → CUSTOMER HISTORY
-    // =========================
+    
     [HttpGet("{customerId}/history")]
     [Authorize(Roles = "Admin,Staff ")]
     public async Task<IActionResult> GetCustomerHistory(int customerId)
@@ -185,9 +185,9 @@ public class CustomerController : ControllerBase
         return Ok(history);
     }
 
-    // =========================
+    
     // ADMIN → SEARCH CUSTOMERS
-    // =========================
+    
     [HttpPost("search")]
     [Authorize(Roles = "Admin,Staff")]
     public async Task<IActionResult> SearchCustomers(CustomerSearchDto dto)

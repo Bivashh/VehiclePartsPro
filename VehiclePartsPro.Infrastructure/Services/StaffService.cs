@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using VehiclePartsPro.Application.DTOs.Staff;
 using VehiclePartsPro.Application.Interfaces;
 using VehiclePartsPro.Domain.Entities;
 using VehiclePartsPro.Infrastructure.Data;
@@ -27,9 +28,30 @@ public class StaffService : IStaffService
     // =========================================
     // GET ALL STAFF (ADMIN)
     // =========================================
-    public async Task<List<Staff>> GetAllStaffAsync()
+    public async Task<List<StaffDto>> GetAllStaffAsync()
     {
-        return await _db.Staffs.ToListAsync();
+        return await _db.Staffs
+            .GroupJoin(
+                _db.Users,
+                staff => staff.UserId,
+                user => user.Id,
+                (staff, users) => new { staff, users }
+            )
+            .SelectMany(
+                x => x.users.DefaultIfEmpty(),
+                (x, user) => new StaffDto
+                {
+                    Id = x.staff.Id,
+                    UserId = x.staff.UserId,
+                    FullName = user != null ? user.FullName : "",
+                    Email = user != null ? user.Email! : "",
+                    Phone = x.staff.Phone,
+                    EmployeeCode = x.staff.EmployeeCode,
+                    HiredAt = x.staff.HiredAt
+                }
+            )
+            .OrderBy(x => x.Id)
+            .ToListAsync();
     }
 
     // =========================================
