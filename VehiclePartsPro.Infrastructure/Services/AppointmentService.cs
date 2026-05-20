@@ -78,6 +78,7 @@ public class AppointmentService : IAppointmentService
             {
                 Id = a.Id,
                 CustomerId = a.CustomerId,
+                CustomerName = "",
                 VehicleId = a.VehicleId,
                 VehiclePlate = a.Vehicle.PlateNumber,
                 VehicleName = a.Vehicle.Make + " " + a.Vehicle.Model,
@@ -93,14 +94,30 @@ public class AppointmentService : IAppointmentService
 
     public async Task<List<AppointmentDto>> GetAllAppointmentsAsync()
     {
-        return await _db.Appointments
+        var appointments = await _db.Appointments
             .Include(a => a.Vehicle)
             .Include(a => a.Customer)
             .OrderByDescending(a => a.CreatedAt)
-            .Select(a => new AppointmentDto
+            .ToListAsync();
+
+        var userIds = appointments
+            .Select(a => a.Customer.UserId)
+            .Distinct()
+            .ToList();
+
+        var users = await _db.Users
+            .Where(u => userIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id);
+
+        return appointments.Select(a =>
+        {
+            users.TryGetValue(a.Customer.UserId, out var user);
+
+            return new AppointmentDto
             {
                 Id = a.Id,
                 CustomerId = a.CustomerId,
+                CustomerName = user?.FullName ?? "",
                 VehicleId = a.VehicleId,
                 VehiclePlate = a.Vehicle.PlateNumber,
                 VehicleName = a.Vehicle.Make + " " + a.Vehicle.Model,
@@ -110,8 +127,8 @@ public class AppointmentService : IAppointmentService
                 AppointmentDate = a.AppointmentDate,
                 Status = a.Status,
                 CreatedAt = a.CreatedAt
-            })
-            .ToListAsync();
+            };
+        }).ToList();
     }
 
     public async Task<Appointment?> GetAppointmentEntityAsync(int id)
